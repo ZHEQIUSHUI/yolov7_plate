@@ -34,10 +34,10 @@ def rec_pre_precessing(img,size=(48,168)): #识别前处理
 def get_plate_result(img,session_rec): #识别后处理
     img =rec_pre_precessing(img)
     y_onnx = session_rec.run([session_rec.get_outputs()[0].name], {session_rec.get_inputs()[0].name: img})[0]
+    # print(y_onnx.shape)
+    # index =np.argmax(y_onnx[0],axis=1)  #找出概率最大的那个字符的序号
     # print(y_onnx[0])
-    index =np.argmax(y_onnx[0],axis=1)  #找出概率最大的那个字符的序号
-    # print(y_onnx[0])
-    plate_no = decodePlate(index)
+    plate_no = decodePlate(y_onnx[0])
     # plate_no = decodePlate(y_onnx[0])
     return plate_no
 
@@ -206,7 +206,7 @@ def draw_result(orgimg,dict_list):
         rect_area[1]=min(orgimg.shape[1],int(y-padding_h))
         rect_area[2]=max(0,int(rect_area[2]+padding_w))
         rect_area[3]=min(orgimg.shape[0],int(rect_area[3]+padding_h))
-
+    
         height_area = result['roi_height']
         landmarks=result['landmarks']
         result = result['plate_no']
@@ -214,8 +214,8 @@ def draw_result(orgimg,dict_list):
         for i in range(4):  #关键点
             cv2.circle(orgimg, (int(landmarks[i][0]), int(landmarks[i][1])), 5, clors[i], -1)
         cv2.rectangle(orgimg,(rect_area[0],rect_area[1]),(rect_area[2],rect_area[3]),(0,0,255),2) #画框
-        if len(result)<0:
-            orgimg=cv2ImgAddText(orgimg,result,rect_area[0]-height_area,rect_area[1]-height_area-10,(255,0,0),height_area)
+        # if len(result)<0:
+        orgimg=cv2ImgAddText(orgimg,result,rect_area[0]-height_area,rect_area[1]-height_area-10,(255,0,0),height_area)
     print(result_str)
     return orgimg
 
@@ -232,7 +232,8 @@ if __name__ == "__main__":
     allFilePath(opt.image_path,file_list)
     providers =  ['CPUExecutionProvider']
     clors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255)]
-    img_size = (opt.img_size,opt.img_size)
+    # img_size = (opt.img_size,opt.img_size)
+    img_size = (384,640)
     session_detect = onnxruntime.InferenceSession(opt.detect_model, providers=providers )
     session_rec = onnxruntime.InferenceSession(opt.rec_model, providers=providers )
     if not os.path.exists(opt.output):

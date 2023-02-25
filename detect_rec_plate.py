@@ -133,11 +133,11 @@ def draw_result(orgimg,dict_list):
         result = result['plate_no']
         result_str+=result+" "
         cv2.rectangle(orgimg,(rect_area[0],rect_area[1]),(rect_area[2],rect_area[3]),(0,0,255),2) #画框
-        if len(result)>6:
-            for i in range(4):  #关键点
-                cv2.circle(orgimg, (int(landmarks[i][0]), int(landmarks[i][1])), 5, clors[i], -1)
-            
-            orgimg=cv2ImgAddText(orgimg,result,rect_area[0]-height_area,rect_area[1]-height_area-10,(0,255,0),height_area)
+        # if len(result)>6:
+        for i in range(4):  #关键点
+            cv2.circle(orgimg, (int(landmarks[i][0]), int(landmarks[i][1])), 5, clors[i], -1)
+        
+        orgimg=cv2ImgAddText(orgimg,result,rect_area[0]-height_area,rect_area[1]-height_area-10,(0,255,0),height_area)
     print(result_str)
     return orgimg
 
@@ -160,6 +160,10 @@ if __name__ == '__main__':
     plate_rec_model=init_model(device,opt.rec_model) 
     if not os.path.exists(opt.output):
         os.mkdir(opt.output)
+
+    rec_input = torch.ones([1,3,48, 168]).cuda()
+    
+    torch.onnx.export(plate_rec_model,rec_input,"weights/plate_rec.onnx",input_names=["images"],output_names=["output"],opset_version=11)
 
     file_list=[]
     allFilePath(opt.source,file_list)
