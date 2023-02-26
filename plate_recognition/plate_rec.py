@@ -37,7 +37,7 @@ def image_processing(img,device):
 
     # normalize
     img = img.astype(np.float32)
-    img = (img / 255. - mean_value) / std_value
+    # img = (img / 255. - mean_value) / std_value
     img = img.transpose([2, 0, 1])
     img = torch.from_numpy(img)
 

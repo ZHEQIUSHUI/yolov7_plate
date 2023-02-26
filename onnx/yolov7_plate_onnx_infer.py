@@ -26,7 +26,7 @@ def decodePlate(preds):        #识别后处理
 def rec_pre_precessing(img,size=(48,168)): #识别前处理
     img =cv2.resize(img,(168,48))
     img = img.astype(np.float32)
-    img = (img/255-mean_value)/std_value  #归一化 减均值 除标准差
+    # img = (img/255-mean_value)/std_value  #归一化 减均值 除标准差
     img = img.transpose(2,0,1)         #h,w,c 转为 c,h,w
     img = img.reshape(1,*img.shape)    #channel,height,width转为batch,channel,height,channel
     return img

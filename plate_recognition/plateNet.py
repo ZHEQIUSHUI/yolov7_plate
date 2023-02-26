@@ -40,6 +40,7 @@ class myNet_ocr(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        x = (x - (0.588*255))*(1.0/(0.193*255))
         x = self.feature(x)
         x=self.loc(x)
         x=self.newCnn(x)
