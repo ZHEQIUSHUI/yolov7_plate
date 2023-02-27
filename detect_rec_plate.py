@@ -161,7 +161,7 @@ if __name__ == '__main__':
     if not os.path.exists(opt.output):
         os.mkdir(opt.output)
 
-    rec_input = torch.ones([1,3,48, 168]).cuda()
+    rec_input = torch.ones([1,3,48, 168]).to(device)
     
     torch.onnx.export(plate_rec_model,rec_input,"weights/plate_rec.onnx",input_names=["images"],output_names=["output"],opset_version=11)
 
