@@ -1,0 +1,3 @@
+[submodule "ncnn_sample"]
+	path = ncnn_sample
+	url = https://github.com/we0091234/NCNN_SAMPLE.git

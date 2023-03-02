@@ -53,7 +53,7 @@ def get_plate_result(img,device,model):
     newPreds=decodePlate(preds)
     plate=""
     for i in newPreds:
-        plate+=plateName[i]
+        plate+=plateName[int(i)]
     # if not (plate[0] in plateName[1:44] ):
     #     return ""
     return plate
