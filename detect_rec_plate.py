@@ -60,9 +60,9 @@ def get_plate_rec_landmark(img, xyxy, conf, landmarks, class_num,device,plate_re
     landmarks_np=np.zeros((4,2))
     rect=[x1,y1,x2,y2]
     for i in range(4):
-        point_x = int(landmarks[2 * i])
-        point_y = int(landmarks[2 * i + 1])
-        landmarks_np[i]=np.array([point_x,point_y])
+        # point_x = int(landmarks[2 * i])
+        # point_y = int(landmarks[2 * i + 1])
+        landmarks_np[i]=np.array([landmarks[2 * i],landmarks[2 * i + 1]])
 
     class_label= int(class_num)  #车牌的的类型0代表单牌，1代表双层车牌
     roi_img = four_point_transform(img,landmarks_np)   #透视变换得到车牌小图
@@ -82,10 +82,11 @@ def get_plate_rec_landmark(img, xyxy, conf, landmarks, class_num,device,plate_re
     result_dict['roi_height']=roi_img.shape[0]
     result_dict['score']=conf
     result_dict['label']=class_label
+    result_dict['plate_img'] = roi_img
     return result_dict
 
-def detect_Recognition_plate(model, orgimg, device,plate_rec_model,img_size):
-    conf_thres = 0.3
+def detect_Recognition_plate(model, orgimg, device,plate_rec_model,img_size,conf_thres = 0.3):
+    
     iou_thres = 0.5
     dict_list=[]
     im0 = copy.deepcopy(orgimg)
