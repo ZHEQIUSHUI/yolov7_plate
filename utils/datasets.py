@@ -11,7 +11,7 @@ from itertools import repeat
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 from threading import Thread
-
+import albumentations as A
 import cv2
 import numpy as np
 import torch
@@ -906,12 +906,62 @@ def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scale
     img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
     return img, ratio, (dw, dh)
 
+_transform = A.Compose(
+            [
+                # geometric augmentations
+                A.ShiftScaleRotate(shift_limit=0.0625,
+                                   scale_limit=0.2,
+                                   rotate_limit=45,
+                                   border_mode=cv2.BORDER_CONSTANT,
+                                   p=0.3),
+
+                # add noise
+                A.OneOf([
+                    A.GaussNoise(),
+                    A.JpegCompression(),
+                    A.ISONoise(),
+                ],
+                        p=0.6),
+                # add blur
+                A.OneOf([
+                    A.MotionBlur(p=0.2),
+                    A.MedianBlur(blur_limit=3, p=0.1),
+                    A.Blur(blur_limit=3, p=0.1),
+                ],
+                        p=0.3),
+                # contrast
+                A.OneOf([
+                    A.CLAHE(clip_limit=2),
+                    A.Sharpen(),
+                    A.Emboss(),
+                    A.RandomBrightnessContrast(),
+                ],
+                        p=0.3),
+
+                # color shift
+                A.OneOf([
+                    A.HueSaturationValue(hue_shift_limit=0.2,
+                                         sat_shift_limit=0.2,
+                                         val_shift_limit=0.2,
+                                         p=0.6),
+                    A.RandomBrightnessContrast(
+                        brightness_limit=0.2, contrast_limit=0.2, p=0.6)
+                ],
+                        p=0.3),
+                # greyscale
+                A.ToGray(p=0.1),
+                # random gamma
+                A.RandomGamma(
+                    gamma_limit=(80, 120), eps=None, always_apply=False,
+                    p=0.3),
+            ])
 
 def random_perspective(img, targets=(), segments=(), degrees=10, translate=.1, scale=.1, shear=10, perspective=0.0,
                        border=(0, 0), kpt_label=False):
     # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-10, 10))
     # targets = [cls, xyxy]
-
+    img = _transform(image=img)['image']
+    
     height = img.shape[0] + border[0] * 2  # shape(h,w,c)
     width = img.shape[1] + border[1] * 2
 
